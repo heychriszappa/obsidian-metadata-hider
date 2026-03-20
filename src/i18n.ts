@@ -1,5 +1,8 @@
 const EN = {
 	command: {
+		toggleHonorPropertiesVisible: 'Metadata Hider: Ignore/Honor "keep displaying" metadata keys',
+		honorPropertiesVisibleOn: 'Metadata Hider: honoring "keep displaying" metadata keys.',
+		honorPropertiesVisibleOff: 'Metadata Hider: ignoring "keep displaying" metadata keys.',
 	},
 	setting: {
 		entries: {
@@ -25,7 +28,9 @@ const EN = {
 
 const ZH = {
 	command: {
-
+		toggleHonorPropertiesVisible: 'Metadata Hider：切换是否忽略“永远显示”的元数据属性',
+		honorPropertiesVisibleOn: 'Metadata Hider：正在遵循“永远显示”的元数据属性设置。',
+		honorPropertiesVisibleOff: 'Metadata Hider：正在忽略“永远显示”的元数据属性设置。',
 	},
 	setting: {
 		entries: {

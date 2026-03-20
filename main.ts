@@ -17,6 +17,8 @@ interface MetadataHiderSettings {
 	hideEmptyEntry: boolean;
 	hideEmptyEntryInSideDock: boolean;
 	propertiesVisible: string;
+	// When false, temporarily ignore `propertiesVisible` (i.e. don't force empty keys to display).
+	honorPropertiesVisible: boolean;
 	// propertiesInvisible: string;
 	// propertiesInvisibleAlways: string;
 	propertyHideAll: string;
@@ -28,6 +30,7 @@ const DEFAULT_SETTINGS: MetadataHiderSettings = {
 	hideEmptyEntry: true,
 	hideEmptyEntryInSideDock: false,
 	propertiesVisible: "",
+	honorPropertiesVisible: true,
 	// propertiesInvisible: "",
 	// propertiesInvisibleAlways: "",
 	propertyHideAll: "hide",
@@ -64,6 +67,22 @@ export default class MetadataHider extends Plugin {
 	async onload() {
 		await this.loadSettings();
 		this.addSettingTab(new MetadataHiderSettingTab(this.app, this));
+
+		// Command palette toggle: ignore/honor the "keep displaying" metadata keys.
+		this.addCommand({
+			id: 'metadata-hider-toggle-honor-properties-visible',
+			name: Locals.get().command.toggleHonorPropertiesVisible,
+			callback: async () => {
+				this.settings.honorPropertiesVisible = !this.settings.honorPropertiesVisible;
+				await this.saveSettings();
+				this.debounceUpdateCSS();
+				new Notice(
+					this.settings.honorPropertiesVisible
+						? Locals.get().command.honorPropertiesVisibleOn
+						: Locals.get().command.honorPropertiesVisibleOff
+				);
+			},
+		});
 
 		this.app.workspace.onLayoutReady(() => {
 			setTimeout(() => { this.updateCSS(); }, 100);
@@ -247,11 +266,15 @@ function genAllCSS(plugin: MetadataHider): string {
 		".workspace-split:not(.mod-sidedock) "
 	))
 
-	content.push(genCSS(
-		string2list(plugin.settings.propertiesVisible),
-		'/* * Always visible */',
-		' { display: flex; }'
-	))
+	// `propertiesVisible` can be temporarily ignored via a command palette toggle.
+	const alwaysVisibleProps = string2list(plugin.settings.propertiesVisible).filter((p) => p);
+	if (s.honorPropertiesVisible && alwaysVisibleProps.length > 0) {
+		content.push(genCSS(
+			alwaysVisibleProps,
+			'/* * Always visible */',
+			' { display: flex; }'
+		))
+	}
 
 	return content.join(' ')
 }
