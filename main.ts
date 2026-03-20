@@ -226,8 +226,13 @@ function genAllCSS(plugin: MetadataHider): string {
 			`.metadata-container.is-active .metadata-property { display: flex !important; }`,
 			/* * Hide the metadata that is empty */
 			`.metadata-property:has(.metadata-property-value .mod-truncate:empty),`,
+			`.metadata-property:has(.metadata-property-value .metadata-input:empty),`,
+			`.metadata-property:has(.metadata-property-value .metadata-input-longtext:empty),`,
+			`.metadata-property:has(.metadata-property-value input.metadata-input:placeholder-shown),`,
+			`.metadata-property:has(.metadata-property-value textarea.metadata-input:placeholder-shown),`,
 			`.metadata-property:has(.metadata-property-value input.metadata-input[type="number"]:placeholder-shown),`,
 			`.metadata-property[data-property-type="text"]:has(input[type="date"]),`,
+			`.metadata-property[data-property-type="checkbox"]:has(.metadata-property-value input.metadata-input[type="checkbox"]:not(:checked)),`,
 			`.metadata-property:has(.metadata-property-value .multi-select-container > .multi-select-input:first-child) {`,
 			`	display: none;`,
 			`}`,
