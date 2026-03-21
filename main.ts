@@ -17,8 +17,10 @@ interface MetadataHiderSettings {
 	hideEmptyEntry: boolean;
 	hideEmptyEntryInSideDock: boolean;
 	propertiesVisible: string;
-	// When false, temporarily ignore `propertiesVisible` (i.e. don't force empty keys to display).
-	honorPropertiesVisible: boolean;
+	// When true, show empty metadata properties (overrides "Hide empty metadata properties" until toggled off).
+	showEmptyMetadataProperties: boolean;
+	/** Pop-up notice when using the command to show/hide empty metadata. */
+	notifyToggleShowEmptyMetadata: boolean;
 	// propertiesInvisible: string;
 	// propertiesInvisibleAlways: string;
 	propertyHideAll: string;
@@ -30,7 +32,8 @@ const DEFAULT_SETTINGS: MetadataHiderSettings = {
 	hideEmptyEntry: true,
 	hideEmptyEntryInSideDock: false,
 	propertiesVisible: "",
-	honorPropertiesVisible: true,
+	showEmptyMetadataProperties: false,
+	notifyToggleShowEmptyMetadata: true,
 	// propertiesInvisible: "",
 	// propertiesInvisibleAlways: "",
 	propertyHideAll: "hide",
@@ -68,19 +71,22 @@ export default class MetadataHider extends Plugin {
 		await this.loadSettings();
 		this.addSettingTab(new MetadataHiderSettingTab(this.app, this));
 
-		// Command palette toggle: ignore/honor the "keep displaying" metadata keys.
+		// Command palette: temporarily show or hide empty metadata properties (overrides hide-empty when showing).
 		this.addCommand({
-			id: 'metadata-hider-toggle-honor-properties-visible',
-			name: Locals.get().command.toggleHonorPropertiesVisible,
+			id: 'metadata-hider-toggle-show-empty-metadata',
+			name: Locals.get().command.toggleShowEmptyMetadata,
 			callback: async () => {
-				this.settings.honorPropertiesVisible = !this.settings.honorPropertiesVisible;
+				this.settings.showEmptyMetadataProperties = !this.settings.showEmptyMetadataProperties;
 				await this.saveSettings();
-				this.debounceUpdateCSS();
-				new Notice(
-					this.settings.honorPropertiesVisible
-						? Locals.get().command.honorPropertiesVisibleOn
-						: Locals.get().command.honorPropertiesVisibleOff
-				);
+				// Apply immediately — debounceUpdateCSS waits ~1s and feels laggy on hotkeys.
+				this.updateCSS();
+				if (this.settings.notifyToggleShowEmptyMetadata) {
+					new Notice(
+						this.settings.showEmptyMetadataProperties
+							? Locals.get().command.showEmptyMetadataOn
+							: Locals.get().command.showEmptyMetadataOff
+					);
+				}
 			},
 		});
 
@@ -220,7 +226,7 @@ function genCSS(properties: string[], cssPrefix: string, cssSuffix: string, pare
 function genAllCSS(plugin: MetadataHider): string {
 	const s = plugin.settings;
 	let content: string[] = [];
-	if (s.hideEmptyEntry) {
+	if (s.hideEmptyEntry && !s.showEmptyMetadataProperties) {
 		content = content.concat([
 			// Show all metadata when it is focused
 			`.metadata-container.is-active .metadata-property { display: flex !important; }`,
@@ -271,9 +277,8 @@ function genAllCSS(plugin: MetadataHider): string {
 		".workspace-split:not(.mod-sidedock) "
 	))
 
-	// `propertiesVisible` can be temporarily ignored via a command palette toggle.
 	const alwaysVisibleProps = string2list(plugin.settings.propertiesVisible).filter((p) => p);
-	if (s.honorPropertiesVisible && alwaysVisibleProps.length > 0) {
+	if (alwaysVisibleProps.length > 0) {
 		content.push(genCSS(
 			alwaysVisibleProps,
 			'/* * Always visible */',
@@ -393,6 +398,17 @@ class MetadataHiderSettingTab extends PluginSettingTab {
 						});
 				});
 		}
+		new Setting(containerEl)
+			.setName(ts.notifyToggleShowEmpty.name)
+			.setDesc(ts.notifyToggleShowEmpty.desc)
+			.addToggle((toggle) => {
+				toggle
+					.setValue(this.plugin.settings.notifyToggleShowEmptyMetadata)
+					.onChange(async (value) => {
+						this.plugin.settings.notifyToggleShowEmptyMetadata = value;
+						await this.plugin.saveSettings();
+					});
+			});
 		new Setting(containerEl)
 			.setName({ en: "Key to hide the whole metadata properties table", zh: "隐藏整个文档属性（元数据）表格", "zh-TW": "隱藏整個文檔屬性（元數據）表格" }[lang] as string)
 			.setDesc({ en: `when its value is true, the whole metadata properties table will be hidden`, zh: `当该属性值为真时`, "zh-TW": `當該屬性值為真時` }[lang] as string)

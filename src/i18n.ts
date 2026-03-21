@@ -1,8 +1,8 @@
 const EN = {
 	command: {
-		toggleHonorPropertiesVisible: 'Metadata Hider: Ignore/Honor "keep displaying" metadata keys',
-		honorPropertiesVisibleOn: 'Metadata Hider: honoring "keep displaying" metadata keys.',
-		honorPropertiesVisibleOff: 'Metadata Hider: ignoring "keep displaying" metadata keys.',
+		toggleShowEmptyMetadata: 'Metadata Hider: Toggle showing empty metadata properties',
+		showEmptyMetadataOn: 'Metadata Hider: showing empty metadata properties.',
+		showEmptyMetadataOff: 'Metadata Hider: hiding empty metadata properties (per settings).',
 	},
 	setting: {
 		entries: {
@@ -22,15 +22,19 @@ const EN = {
 		headings: {
 			hide: "Hide metadata properties",
 		},
+		notifyToggleShowEmpty: {
+			name: "Notice when toggling empty metadata visibility",
+			desc: "Show a pop-up when you use the command to show or hide empty metadata properties.",
+		},
 	}
 
 }
 
 const ZH = {
 	command: {
-		toggleHonorPropertiesVisible: 'Metadata Hider：切换是否忽略“永远显示”的元数据属性',
-		honorPropertiesVisibleOn: 'Metadata Hider：正在遵循“永远显示”的元数据属性设置。',
-		honorPropertiesVisibleOff: 'Metadata Hider：正在忽略“永远显示”的元数据属性设置。',
+		toggleShowEmptyMetadata: 'Metadata Hider：切换是否显示空白元数据属性',
+		showEmptyMetadataOn: 'Metadata Hider：正在显示空白元数据属性。',
+		showEmptyMetadataOff: 'Metadata Hider：按设置隐藏空白元数据属性。',
 	},
 	setting: {
 		entries: {
@@ -49,6 +53,10 @@ const ZH = {
 		},
 		headings: {
 			hide: "隐藏元数据属性",
+		},
+		notifyToggleShowEmpty: {
+			name: "切换空白元数据显示时弹出提示",
+			desc: "使用命令显示或隐藏空白元数据属性时，是否显示弹窗提示。",
 		},
 	}
 }
